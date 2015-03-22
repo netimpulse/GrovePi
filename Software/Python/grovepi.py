@@ -99,6 +99,10 @@ chainableRgbLedSetPattern_cmd = [93]
 chainableRgbLedSetModulo_cmd = [94]
 # sets leds similar to a bar graph, reversible
 chainableRgbLedSetLevel_cmd = [95]
+# Dust sensor PPD42
+dustInit_cmd = [100]
+dustRead_cmd = [101]
+dustStop_cmd = [102]
 
 # This allows us to be more specific about which commands contain unused bytes
 unused = 0
@@ -194,6 +198,26 @@ def ultrasonicRead(pin):
 	read_i2c_byte(address)
 	number = read_i2c_block(address)
 	return (number[1] * 256 + number[2])
+
+# Read value from Grove Ultrasonic
+def dustInit(pin10, pin25,  samplingTime):
+	write_i2c_block(address, dustInit_cmd + [pin10, pin25, samplingTime])
+	time.sleep(.2)
+	read_i2c_byte(address)
+	number = read_i2c_block(address)
+	return "dust sensor started"
+def dustRead():
+	write_i2c_block(address, dustRead_cmd + [unused, unused, unused])
+	time.sleep(.2)
+	read_i2c_byte(address)
+	number = read_i2c_block(address)
+	return "%s.%s.%s" % (number[1], number[2], number[3])
+def dustStop():
+	write_i2c_block(address, dustStop_cmd + [unused, unused, unused])
+	time.sleep(.2)
+	read_i2c_byte(address)
+	number = read_i2c_block(address)
+	return "dust sensor stopped"
 
 
 # Read the firmware version

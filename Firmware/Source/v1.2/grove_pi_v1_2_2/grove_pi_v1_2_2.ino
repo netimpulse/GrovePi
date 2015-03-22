@@ -5,6 +5,7 @@
 #include "Grove_LED_bar.h"
 #include "TM1637.h"
 #include "ChainableLED.h"
+#include "PPD42.h"
 MMA7660 acc;
 DS1307 clock;
 DHT dht;
@@ -18,6 +19,9 @@ int cmd[5];
 int index=0;
 int flag=0;
 int i;
+unsigned long starttime;
+unsigned long lowpulseoccupancy = 0;
+unsigned long sampletime_ms = 30000;//sampe 30s ;
 byte val=0,b[9],float_array[4];
 int aRead=0;
 byte accFlag=0,clkFlag=0;
@@ -32,11 +36,21 @@ void setup()
     Wire.onRequest(sendData);
 
     Serial.println("Ready!");
+    starttime = millis()
+    
+    
 }
 int pin;
 int j;
 void loop()
 {
+  
+  // TODO read sensors queue 
+  
+  DUST::readAndCache();
+    
+  
+  
   long dur,RangeCm;
   if(index==4 && flag==0)
   {
@@ -89,6 +103,23 @@ void loop()
       b[1] = 1;
       b[2] = 2;
       b[3] = 2;
+    }
+    //Dust Read
+    if(cmd[0]==9)
+    {
+      pin=cmd[1];
+      dur = pulseIn(pin,LOW);
+      lowpulseoccupancy = lowpulseoccupancy+duration;
+
+      if ((millis()-starttime) > sampletime_ms)//if the sampel time == 30s
+      {
+        ratio = lowpulseoccupancy/(sampletime_ms*10.0);  // Integer percentage 0=>100
+        concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // using spec sheet curve
+        b[1]=lowpulseoccupancy;
+        b[2]=ratio;
+        b[3]=concentration;
+        starttime = millis();
+      }
     }
     //Accelerometer x,y,z, read
     if(cmd[0]==20)
@@ -480,6 +511,34 @@ void loop()
         }
       }
     }
+    if(cmd[0] == 100)
+    {
+      if(cmd[3] == 0)
+      {
+        // PIN_10, PIN_25, samplingTime
+        DUST:begin(cmd[1],cmd[2],cmd[4]);
+        //sensorID = "PPD42";
+        //SENSOR::add(sensorId);
+      }
+      else if(cmd[3] ==  1)
+      {
+        //read data
+        if(DUST::isDataCached())
+        {
+          b[1] = DUST::getCacheP1();
+          b[2] = DUST::getCacheP2();
+        } else {
+          b = nan;
+        } 
+      }
+      else if(cmd[3] == 2)
+      {
+        //todo remove dust from sensor list to poll 
+        DUST::cleanData();
+        SENSOR::remove(sensorId);
+      }
+ 
+    }
 
     // end Grove Chainable RGB LED
   }
@@ -508,6 +567,8 @@ void sendData()
   if(cmd[0] == 8 || cmd[0] == 20)
     Wire.write(b, 4);
   if(cmd[0] == 30 || cmd[0] == 40)
+    Wire.write(b, 9);
+  if(cmd[0] == 100 || cmd[1] == 1)
     Wire.write(b, 9);
 }
 
