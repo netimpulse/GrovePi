@@ -4,7 +4,7 @@
 #include <PinChangeIntConfig.h>
 #include "PPD42.h"
  /*
-DHT::DUST(uint8_t pin10, uint8_t pin25, uint8_t sampling) {
+DUST::DUST(uint8_t pin10, uint8_t pin25, uint8_t sampling) {
   _pin10 = pin10;
   _pin25 = pin25;
   _sampling = sampling;
@@ -29,7 +29,7 @@ void DUST::begin(uint8_t pin10, uint8_t pin25, uint8_t sampletime_ms) {
   PCintPort::attachInterrupt(pin25, pin125trigger,CHANGE);
 }
 
-void pin10trigger()
+void DUST::pin10trigger()
 {
   valP1 = digitalRead(_pin25);
   if(valP1 == LOW){
@@ -42,7 +42,7 @@ void pin10trigger()
   }
 }
 
-void pin25trigger()
+void DUST::pin25trigger()
 {
   valP2 = digitalRead(_pin25);
   if(valP2 == LOW){
@@ -56,7 +56,7 @@ void pin25trigger()
 }
 
 
-void readAndCache()
+void DUST::readAndCache()
 {
     cli(); // disable interrupts
     
@@ -89,12 +89,12 @@ void DUST::stop()
   PCintPort::detachInterrupt(pin25);
 }
 
-float readPM10()
+float DUST::readPM10()
 {
   return _PM10count;
 }
 
-float readPM25()
+float DUST::readPM25()
 {
   return _PM25count;
 }

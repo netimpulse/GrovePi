@@ -2,7 +2,7 @@
 #include "MMA7660.h"
 #include "DS1307.h"
 #include "DHT.h"
-#include "Grove_LED_bar.h"
+#include "Grove_LED_Bar.h"
 #include "TM1637.h"
 #include "ChainableLED.h"
 #include "PPD42.h"
@@ -37,7 +37,7 @@ void setup()
     Wire.onRequest(sendData);
 
     Serial.println("Ready!");
-    starttime = millis()
+    starttime = millis();
     
     
 }

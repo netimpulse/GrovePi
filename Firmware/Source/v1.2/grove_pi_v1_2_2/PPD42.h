@@ -1,5 +1,5 @@
-#ifndef DHT_H
-#define DHT_H
+#ifndef DUST_H
+#define DUST_H
 #include "Arduino.h"
 #include <PinChangeInt.h>
 #include <PinChangeIntConfig.h>
@@ -16,8 +16,8 @@ class DUST {
   boolean read(void);
   unsigned long _lastreadtime;
   long triggerOnP1;
-  long durationP1;
-  long durationP2;
+  volatile long durationP1;
+  volatile long durationP2;
   float _PM10count;
   float _PM25count;
   void pin10trigger(void);
