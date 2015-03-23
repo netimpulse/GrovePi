@@ -9,6 +9,7 @@
 MMA7660 acc;
 DS1307 clock;
 DHT dht;
+DUST dust;
 Grove_LED_Bar ledbar[6];  // 7 instances for D2-D8, however, max 4 bars, you can't use adjacent sockets, 4 pin display
 TM1637 fourdigit[6];      // 7 instances for D2-D8, however, max 4 displays, you can't use adjacent sockets, 4 pin display
 ChainableLED rgbled[6];   // 7 instances for D2-D8
@@ -47,7 +48,7 @@ void loop()
   
   // TODO read sensors queue 
   
-  DUST::readAndCache();
+  dust.readAndCache();
     
   
   
@@ -105,21 +106,24 @@ void loop()
       b[3] = 2;
     }
     //Dust Read
-    if(cmd[0]==9)
+    if(cmd[0]==100)
     {
-      pin=cmd[1];
-      dur = pulseIn(pin,LOW);
-      lowpulseoccupancy = lowpulseoccupancy+duration;
+      dust.begin(cmd[1], cmd[2],cmd[3]);
+      //sensor.add('dust');
+      // todo response
 
-      if ((millis()-starttime) > sampletime_ms)//if the sampel time == 30s
-      {
-        ratio = lowpulseoccupancy/(sampletime_ms*10.0);  // Integer percentage 0=>100
-        concentration = 1.1*pow(ratio,3)-3.8*pow(ratio,2)+520*ratio+0.62; // using spec sheet curve
-        b[1]=lowpulseoccupancy;
-        b[2]=ratio;
-        b[3]=concentration;
-        starttime = millis();
-      }
+    }
+    if(cmd[0]==101)
+    {
+      b[1] = dust.readPM10();
+      b[2] = dust.readPM25();
+    }
+    if(cmd[0]==102)
+    {
+      dust.stop();
+      //sensor.remove('dust');
+
+      //todo response
     }
     //Accelerometer x,y,z, read
     if(cmd[0]==20)
@@ -511,34 +515,7 @@ void loop()
         }
       }
     }
-    if(cmd[0] == 100)
-    {
-      if(cmd[3] == 0)
-      {
-        // PIN_10, PIN_25, samplingTime
-        DUST:begin(cmd[1],cmd[2],cmd[4]);
-        //sensorID = "PPD42";
-        //SENSOR::add(sensorId);
-      }
-      else if(cmd[3] ==  1)
-      {
-        //read data
-        if(DUST::isDataCached())
-        {
-          b[1] = DUST::getCacheP1();
-          b[2] = DUST::getCacheP2();
-        } else {
-          b = nan;
-        } 
-      }
-      else if(cmd[3] == 2)
-      {
-        //todo remove dust from sensor list to poll 
-        DUST::cleanData();
-        SENSOR::remove(sensorId);
-      }
- 
-    }
+   
 
     // end Grove Chainable RGB LED
   }

@@ -199,26 +199,47 @@ def ultrasonicRead(pin):
 	number = read_i2c_block(address)
 	return (number[1] * 256 + number[2])
 
-# Read value from Grove Ultrasonic
+# Init Grove Dust sensor
 def dustInit(pin10, pin25,  samplingTime):
 	write_i2c_block(address, dustInit_cmd + [pin10, pin25, samplingTime])
 	time.sleep(.2)
 	read_i2c_byte(address)
 	number = read_i2c_block(address)
 	return "dust sensor started"
+
+# read value from dust sensor	
 def dustRead():
 	write_i2c_block(address, dustRead_cmd + [unused, unused, unused])
 	time.sleep(.2)
 	read_i2c_byte(address)
 	number = read_i2c_block(address)
+	# calculation
+
+    # begins PM10 mass concentration algorithm
+      PM10count = number[1];
+      PM25count = number[2]
+      # double r10 = 2.6*pow(10,-6);
+      # double pi = 3.14159;
+      # double vol10 = (4/3)*pi*pow(r10,3);
+      # double density = 1.65*pow(10,12);
+      # double mass10 = density*vol10;
+      # double K = 3531.5;
+      # float concLarge = (PM10count)*K*mass10;
+      
+      # // next, PM2.5 mass concentration algorithm
+      # double r25 = 0.44*pow(10,-6);
+      # double vol25 = (4/3)*pi*pow(r25,3);
+      # double mass25 = density*vol25;
+      # float concSmall = (PM25count)*K*mass25;
 	return "%s.%s.%s" % (number[1], number[2], number[3])
+
+# Stop data sampling of the grove dust sensor
 def dustStop():
 	write_i2c_block(address, dustStop_cmd + [unused, unused, unused])
 	time.sleep(.2)
 	read_i2c_byte(address)
 	number = read_i2c_block(address)
 	return "dust sensor stopped"
-
 
 # Read the firmware version
 def version():

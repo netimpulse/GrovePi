@@ -18,8 +18,8 @@ class DUST {
   long triggerOnP1;
   long durationP1;
   long durationP2;
-  float PM10count;
-  float PM25count;
+  float _PM10count;
+  float _PM25count;
   void pin10trigger(void);
   void pin25trigger(void);
   
@@ -29,7 +29,7 @@ class DUST {
   void begin(uint8_t pin10, uint8_t pin25, uint8_t _sampling_time=30000);
   float readPM10();
   float readPM25();
-  void calculation()
+  void readAndCache();
   void stop();
 
 };

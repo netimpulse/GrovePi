@@ -12,11 +12,11 @@ DHT::DUST(uint8_t pin10, uint8_t pin25, uint8_t sampling) {
   _PM10count = 0;
 }
 */
-volatile long triggerOnP1;
-volatile long durationP1;
-volatile long durationP2;
-volatile float PM10count; // Volatile or just properties of DUST class ?
-volatile float PM25count;
+// volatile long triggerOnP1;
+// volatile long durationP1;
+// volatile long durationP2;
+// volatile float PM10count; // Volatile or just properties of DUST class ?
+// volatile float PM25count;
 
 void DUST::begin(uint8_t pin10, uint8_t pin25, uint8_t sampletime_ms) {
   // set up the pins!
@@ -56,7 +56,7 @@ void pin25trigger()
 }
 
 
-void calculation()
+void readAndCache()
 {
     cli(); // disable interrupts
     
@@ -72,26 +72,8 @@ void calculation()
       ratioP2 = durationP2/(_sampletime_ms*10.0);
       countP1 = 1.1*pow(ratioP1,3)-3.8*pow(ratioP1,2)+520*ratioP1+0.62;
       countP2 = 1.1*pow(ratioP2,3)-3.8*pow(ratioP2,2)+520*ratioP2+0.62;
-      PM10count = countP2;
-      PM25count = countP1 - countP2;
-      
-   
-      // begins PM10 mass concentration algorithm
-      /*
-      double r10 = 2.6*pow(10,-6);
-      double pi = 3.14159;
-      double vol10 = (4/3)*pi*pow(r10,3);
-      double density = 1.65*pow(10,12);
-      double mass10 = density*vol10;
-      double K = 3531.5;
-      float concLarge = (PM10count)*K*mass10;
-      
-      // next, PM2.5 mass concentration algorithm
-      double r25 = 0.44*pow(10,-6);
-      double vol25 = (4/3)*pi*pow(r25,3);
-      double mass25 = density*vol25;
-      float concSmall = (PM25count)*K*mass25;
-      */
+      _PM10count = countP2;
+      _PM25count = countP1 - countP2;
       
       // reset for next measure
       startTime = millis();
@@ -105,4 +87,14 @@ void DUST::stop()
 {
   PCintPort::detachInterrupt(pin10);
   PCintPort::detachInterrupt(pin25);
+}
+
+float readPM10()
+{
+  return _PM10count;
+}
+
+float readPM25()
+{
+  return _PM25count;
 }
